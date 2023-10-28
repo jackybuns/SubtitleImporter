@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubtitleImporter", "SubtitleImporter\SubtitleImporter.csproj", "{142AEE4E-9311-4CBD-AE33-7E228D2E763B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResoniteSubtitleImporter", "SubtitleImporter\ResoniteSubtitleImporter.csproj", "{142AEE4E-9311-4CBD-AE33-7E228D2E763B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

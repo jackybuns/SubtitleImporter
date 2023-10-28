@@ -7,12 +7,12 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Xabe.FFmpeg;
 
-namespace SubtitleImporter
+namespace ResoniteSubtitleImporter
 {
 
-    public class SubtitleImporter : ResoniteMod
+    public class ResoniteSubtitleImporter : ResoniteMod
     {
-        public override string Name => "SubtitleImporter";
+        public override string Name => "ResoniteSubtitleImporter";
         public override string Author => "Jackybuns";
         public override string Version => "0.0.1"; //Version of the mod, should match the AssemblyVersion
         public override string Link => "https://github.com/YourNameHere/ExampleMod"; // Optional link to a repo where this mod would be located
