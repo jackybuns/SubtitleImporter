@@ -30,6 +30,9 @@ namespace ResoniteSubtitleImporter
         [AutoRegisterConfigKey]
         private static readonly ModConfigurationKey<bool> openInspector = new ModConfigurationKey<bool>("open inspector", "If an inspector should be opened on the imported subtitles", () => true); //Optional config settings
 
+        [AutoRegisterConfigKey]
+        private static readonly ModConfigurationKey<bool> reparentToPlayer = new ModConfigurationKey<bool>("parent under player", "Try to parent subtitles under the video player (only works if the palyer slot gets the same name as the video file)", () => true); //Optional config settings
+
         private static ModConfiguration Config;//If you use config settings, this will be where you interface with them
 
 
@@ -51,28 +54,53 @@ namespace ResoniteSubtitleImporter
             */
         }
 
-        [HarmonyPatch(typeof(VideoImportDialog), "RunImport")]
+        //private static async Task ImportAsync(Slot slot, string path, string name, VideoType type, StereoLayout stereo, DepthPreset depth)
+        //[HarmonyPatch(typeof(VideoImportDialog), "RunImport")]
+        [HarmonyPatch(typeof(VideoImportDialog), "ImportAsync")]
         class VideoImporterDialogPatch
         {
-            static void Prefix(VideoImportDialog __instance)
+            static void Prefix(Slot slot, ref World __state)
+            {
+                __state = slot.World;
+            }
+
+            static void Postfix(Slot slot, string path, ref Task __result, ref World __state)
             {
                 if (!Config.GetValue(enabled))
                     return;
 
-                var path = __instance.Paths.First();
-                var world = __instance.World;
-                var engine = __instance.Engine;
+                //var path = __instance.Paths.First();
+                var world = __state;
+                var engine = world.Engine;
+                var importTask = __result;
 
-                __instance.World.Coroutines.StartTask(async delegate
+                world.Coroutines.StartTask(async delegate
                 {
-                    var filename = Path.GetFileNameWithoutExtension(path);
-                    Msg("Importing subtitles");
-                    await default(ToWorld);
-                    var subRootSlot = world.LocalUserSpace.AddSlot("Subtitles - " + filename);
-                    await default(ToBackground);
                     Uri uri = new Uri(path);
                     if (uri.Scheme == "file")
                     {
+                        // await the video import task that we patch
+                        // we need this so we can ensure that the video player was created already, otherwise we cannot parent the subtitles there
+                        await importTask;
+
+                        var filename = Path.GetFileNameWithoutExtension(path);
+                        Msg("Importing subtitles");
+                        await default(ToWorld);
+                        var subRootSlot = world.LocalUserSpace.AddSlot("Subtitles - " + filename);
+
+                        if (Config.GetValue(reparentToPlayer))
+                        {
+                            subRootSlot.Name = "Subtitles"; // rename cause we already know the filename from the video player
+                            // try to find video player
+                            Slot player = world.LocalUserSpace.FindChild(Path.GetFileName(path));
+                            if (player != null)
+                            {
+                                Msg("Video player found, parenting subtitles");
+                                subRootSlot.SetParent(player);
+                            }
+                        }
+
+                        await default(ToBackground);
                         var info = await FFmpeg.GetMediaInfo(path);
 
                         Msg($"Importing {info.SubtitleStreams.Count()} subtitles");
@@ -151,6 +179,7 @@ namespace ResoniteSubtitleImporter
                             assetProxy.AssetReference.Target = animProvider;
                             referenceProxy.Reference.Target = animProvider;
                             animator.Fields.Add().Target = text.Value;
+
 
                             await default(ToBackground);
 
