@@ -4,6 +4,7 @@ using FrooxEngine;
 using HarmonyLib; // HarmonyLib comes included with a ResoniteModLoader install
 using ResoniteModLoader;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -16,12 +17,18 @@ namespace ResoniteSubtitleImporter
     public class ResoniteSubtitleImporter : ResoniteMod
     {
         public override string Name => "ResoniteSubtitleImporter";
-        public override string Author => "Jackybuns";
+        public override string Author => "Jackybuns (U-Jackson)";
         public override string Version => "0.0.1"; //Version of the mod, should match the AssemblyVersion
-        public override string Link => "https://github.com/YourNameHere/ExampleMod"; // Optional link to a repo where this mod would be located
+        public override string Link => "https://github.com/jackybuns/ResoniteSubtitleImporter"; // Optional link to a repo where this mod would be located
 
         [AutoRegisterConfigKey]
         private static readonly ModConfigurationKey<bool> enabled = new ModConfigurationKey<bool>("import subtitles", "If subtitles should be imported", () => true); //Optional config settings
+
+        [AutoRegisterConfigKey]
+        private static readonly ModConfigurationKey<bool> keepSubFiles = new ModConfigurationKey<bool>("keep subtitle files", "If subtitle files should be kept, otherwise they will be deleted", () => true); //Optional config settings
+
+        [AutoRegisterConfigKey]
+        private static readonly ModConfigurationKey<bool> openInspector = new ModConfigurationKey<bool>("open inspector", "If an inspector should be opened on the imported subtitles", () => true); //Optional config settings
 
         private static ModConfiguration Config;//If you use config settings, this will be where you interface with them
 
@@ -44,112 +51,122 @@ namespace ResoniteSubtitleImporter
             */
         }
 
-        // 	private static async Task ImportAsync(Slot slot, string path, string name, VideoType type, StereoLayout stereo, DepthPreset depth)
-        [HarmonyPatch(typeof(VideoImportDialog), "ImportAsync")]
+        [HarmonyPatch(typeof(VideoImportDialog), "RunImport")]
         class VideoImporterDialogPatch
         {
-            static void Postfix(Slot slot, string path)
+            static void Prefix(VideoImportDialog __instance)
             {
                 if (!Config.GetValue(enabled))
                     return;
 
-                if (slot == null)
-                    Error("Slot is null");
+                var path = __instance.Paths.First();
+                var world = __instance.World;
+                var engine = __instance.Engine;
 
-                slot.World.Coroutines.StartTask(async () =>
+                __instance.World.Coroutines.StartTask(async delegate
                 {
+                    var filename = Path.GetFileNameWithoutExtension(path);
                     Msg("Importing subtitles");
                     await default(ToWorld);
-                    //var subRootSlot = slot.AddSlot("Subtitles");
-                    var subRootSlot = slot.World.LocalUserSpace.AddSlot("Subtitles");
+                    var subRootSlot = world.LocalUserSpace.AddSlot("Subtitles - " + filename);
                     await default(ToBackground);
                     Uri uri = new Uri(path);
                     if (uri.Scheme == "file")
                     {
                         var info = await FFmpeg.GetMediaInfo(path);
 
+                        Msg($"Importing {info.SubtitleStreams.Count()} subtitles");
+                        var i = 0;
                         foreach (var subtitle in info.SubtitleStreams)
                         {
-                            var nameVtt = Path.GetFileName(path) + "-" + subtitle.Language + ".vtt";
-                            var nameSrt = Path.GetFileName(path) + "-" + subtitle.Language + ".srt";
+                            var subname = i + "-" + (string.IsNullOrEmpty(subtitle.Title) ? subtitle.Language : subtitle.Title);
+
+                            var nameVtt = String.Format("{0}-{1}.vtt",
+                                filename, subname);
+                            var nameSrt = String.Format("{0}-{1}.srt",
+                                filename, subname);
                             var outputPathVtt = Path.Combine(Path.GetDirectoryName(path), nameVtt);
                             var outputPathSrt = Path.Combine(Path.GetDirectoryName(path), nameSrt);
 
-                            await FFmpeg.Conversions.New()
+                            // Do an additional conversion into the vtt format as that strips all unneeded html tags
+                            var result = await FFmpeg.Conversions.New()
                                 .AddStream(subtitle)
+                                .SetOutput(outputPathVtt)
+                                .SetOverwriteOutput(true)
+                                .Start();
+
+                            Msg($"VTT Subtitle conversion took {(result.EndTime - result.StartTime).TotalSeconds} seconds");
+
+                            var vttinfo = await FFmpeg.GetMediaInfo(outputPathVtt);
+                            result = await FFmpeg.Conversions.New()
+                                .AddStream(vttinfo.SubtitleStreams.First())
                                 .SetOutput(outputPathSrt)
                                 .SetOverwriteOutput(true)
                                 .Start();
 
+                            Msg($"SRT Subtitle conversion took {(result.EndTime - result.StartTime).TotalSeconds} seconds");
+
+                            // cleanup vtt file
+                            if (File.Exists(outputPathVtt))
+                                File.Delete(outputPathVtt);
+
 
                             // import sub
-                            try
+                            Msg("importing subtitle " + subname);
+                            await default(ToBackground);
+                            AnimX anim = SubtitleImporter.Import(outputPathSrt);
+                            if (anim == null)
                             {
+                                Error("imported subtitle animation is null");
+                                continue;
+                            }
+                            Uri subUri = await engine.LocalDB.SaveAssetAsync(anim);
+                            if (subUri == null)
+                            {
+                                Error("subtitle animation asset uri is null");
+                                continue;
+                            }
+                            await default(ToWorld);
+                            var subSlot = subRootSlot.AddSlot(subname);
+                            var animProvider = subSlot.AttachComponent<StaticAnimationProvider>();
+                            animProvider.URL.Value = subUri;
+                            var animator = subSlot.AttachComponent<Animator>();
+                            animator.Clip.Target = animProvider;
 
-                                Msg("importing subtitle " + subtitle.Language);
-                                await default(ToBackground);
-                                Msg("Before importing anim");
-                                AnimX anim = SubtitleImporter.Import(outputPathSrt);
-                                if (anim == null)
-                                {
-                                    Error("imported subtitle animation is null");
-                                    continue;
-                                }
-                                Msg("before saving asset");
-                                if (slot == null)
-                                    Error("inner Slot is null");
-                                Uri subUri = await slot.World.Engine.LocalDB.SaveAssetAsync(anim);
-                                if (subUri == null)
-                                {
-                                    Error("subtitle animation asset uri is null");
-                                    continue;
-                                }
-                                Msg("after saving asset");
-                                await default(ToWorld);
-                                var subSlot = subRootSlot.AddSlot(subtitle.Language);
-                                var animProvider = subSlot.AttachComponent<StaticAnimationProvider>();
-                                animProvider.URL.Value = subUri;
-                                var animator = subSlot.AttachComponent<Animator>();
-                                animator.Clip.Target = animProvider;
-                            }
-                            catch (Exception ex)
-                            {
-                                Error(ex.Message);
-                                Error(ex.StackTrace);
-                            }
-                            /*
-                            var text = subSlot.AttachComponent<ValueField<string>>();
+                            var dynVarSpace = subSlot.AttachComponent<DynamicVariableSpace>();
+                            dynVarSpace.SpaceName.Value = "Subtitle";
+                            dynVarSpace.OnlyDirectBinding.Value = true;
+
+                            var dynUri = subSlot.AttachComponent<DynamicValueVariable<Uri>>();
+                            dynUri.VariableName.Value = "Subtitle/Uri";
+
+                            var copy = subSlot.AttachComponent<ValueCopy<Uri>>();
+                            copy.Source.Value = animProvider.URL.ReferenceID;
+                            copy.Target.Value = dynUri.Value.ReferenceID;
+
+                            var text = subSlot.AttachComponent<DynamicValueVariable<string>>();
+                            text.VariableName.Value = "Subtitle/Text";
                             AssetProxy<FrooxEngine.Animation> assetProxy = subSlot.AttachComponent<AssetProxy<FrooxEngine.Animation>>();
                             ReferenceProxy referenceProxy = subSlot.AttachComponent<ReferenceProxy>();
                             assetProxy.AssetReference.Target = animProvider;
                             referenceProxy.Reference.Target = animProvider;
                             animator.Fields.Add().Target = text.Value;
-                            */
-                            /*
-                            var dynVarSpace = subSlot.AttachComponent<DynamicVariableSpace>();
-                            var dynVar = subSlot.AttachComponent<DynamicReference<Animator>>();
-                            */
+
                             await default(ToBackground);
 
-                            /*
-                            // first convert to vtt to get rid of nasty html tags we don't need
-                            await FFmpeg.Conversions.New()
-                                .AddStream(subtitle)
-                                .SetOutput(outputPathVtt)
-                                .Start();
-
-                            // then convert that to srt as resonite does not support vtt
-                            var vttInfo = await FFmpeg.GetMediaInfo(outputPathVtt);
-                            await FFmpeg.Conversions.New()
-                                .AddStream(vttInfo.SubtitleStreams.First())
-                                .SetOutput(outputPathSrt)
-                                .Start();
-                            */
-
+                            if (!Config.GetValue(keepSubFiles))
+                            {
+                                if (File.Exists(outputPathSrt))
+                                    File.Delete(outputPathSrt);
+                            }
+                            i++;
                         }
-
+                        await default(ToWorld);
+                        if (Config.GetValue(openInspector))
+                        {
+                            DevCreateNewForm.OpenInspector(subRootSlot);
+                        }
                     }
-                    await default(ToWorld);
                 });
             }
 
