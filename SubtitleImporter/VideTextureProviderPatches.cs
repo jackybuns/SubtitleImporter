@@ -17,7 +17,7 @@ namespace ResoniteSubtitleImporter
     internal class VideTextureProviderPatches
     {
 
-        private static async Task ImportSubtitles(VideoTextureProvider provider)
+        private static async Task ImportSubtitles(VideoTextureProvider provider, bool enforceObjectRoot)
         {
             var uri = provider.URL?.Value;
             if (uri == null)
@@ -28,9 +28,12 @@ namespace ResoniteSubtitleImporter
                 return;
 
             await default(ToWorld);
-            var root = provider.Slot.GetObjectRoot(true);
-            if (root == null || root == provider.World.RootSlot || root == provider.LocalUserSpace)
+            var root = provider.Slot.GetObjectRoot();
+            if (enforceObjectRoot && (root == null || root == provider.World.RootSlot || root == provider.LocalUserSpace))
+            {
+                ResoniteSubtitleImporter.Msg("Could not find root of video player to import subtitles to. Make sure the player has an ObjectRoot component.");
                 return;
+            }
             await default(ToBackground);
             GatherResult gatherResult = await provider.Asset.AssetManager.GatherAsset(uri, 0f, DB_Endpoint.Video).ConfigureAwait(continueOnCapturedContext: false);
             string file = await gatherResult.GetFile().ConfigureAwait(continueOnCapturedContext: false);
@@ -59,7 +62,7 @@ namespace ResoniteSubtitleImporter
                 ResoniteSubtitleImporter.Msg("Automatically importing subtitles");
                 __instance.StartGlobalTask(async delegate
                 {
-                    await ImportSubtitles(__instance);
+                    await ImportSubtitles(__instance, true);
                 });
             }
         }
@@ -90,7 +93,7 @@ namespace ResoniteSubtitleImporter
                     ResoniteSubtitleImporter.Msg("Importing subtitles from VideoTextureProvider");
                     __instance.StartGlobalTask(async delegate
                     {
-                        await ImportSubtitles(__instance);
+                        await ImportSubtitles(__instance, false);
                         await default(ToWorld);
                         button.LabelText = "Done";
                         await default(ToBackground);
