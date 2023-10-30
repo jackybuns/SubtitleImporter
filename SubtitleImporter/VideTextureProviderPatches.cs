@@ -19,7 +19,14 @@ namespace ResoniteSubtitleImporter
 
         private static async Task ImportSubtitles(VideoTextureProvider provider)
         {
-            var uri = provider.URL.Value;
+            var uri = provider.URL?.Value;
+            if (uri == null)
+                return;
+            if (AssetHelper.IsStreamingProtocol(uri))
+                return;
+            if (AssetHelper.IsVideoStreamingService(uri))
+                return;
+
             await default(ToWorld);
             var root = provider.Slot.GetObjectRoot();
             await default(ToBackground);
@@ -38,6 +45,9 @@ namespace ResoniteSubtitleImporter
         {
             var allocator = ImportHelper.GetAllocatingUser(__instance.Slot);
             if (!assetInstanceChanged)
+                return;
+
+            if (__instance.Stream.Value == true)
                 return;
 
             // if the local user spawned the video texture or was the last to change the URL perform auto import
@@ -59,8 +69,6 @@ namespace ResoniteSubtitleImporter
             var button = ui.Button("Import Subtitles");
             button.LocalPressed += async (sender, args) =>
             {
-                button.Enabled = false;
-                button.LabelText = "Importing...";
                 ResoniteSubtitleImporter.Msg("Manually importing subtitles from VideoTextureProvider");
 
                 if (__instance.Stream.Value == true)
@@ -73,6 +81,8 @@ namespace ResoniteSubtitleImporter
                 if (uri == null)
                     return;
 
+                button.Enabled = false;
+                button.LabelText = "Importing...";
                 if (__instance.Asset.LoadState == AssetLoadState.FullyLoaded)
                 {
                     ResoniteSubtitleImporter.Msg("Importing subtitles from VideoTextureProvider");
