@@ -13,16 +13,41 @@ namespace ResoniteSubtitleImporter
 {
     internal class ImportHelper
     {
+        public static string SubtitleRootTag = "SubtitleImport";
+        public static string SubtitleRootSlotNamePrefix = "Subtitles - ";
+
+        /// <summary>
+        /// Destroys all child slots with the <see cref="SubtitleRootTag"/> tag and which name starts with <see cref="SubtitleRootSlotNamePrefix"/>.
+        /// Only destroys them if the provided slot is not the world root or the LocalUserRoot for safety.
+        /// </summary>
+        /// <param name="slot">The slot which children should be cleaned</param>
+        public static void CleanupSubtitles(Slot slot)
+        {
+            if (slot != null && slot != slot.World.RootSlot && slot != slot.LocalUserSpace)
+            {
+                var oldSubs = slot.GetChildrenWithTag(SubtitleRootTag);
+                for (int i = oldSubs.Count - 1; i >= 0; i--)
+                {
+                    if (oldSubs[i].Name.StartsWith(SubtitleRootSlotNamePrefix))
+                        oldSubs[i].Destroy();
+                }
+            }
+        }
+
         public static async Task<Slot> ImportSubtitles(string path, Slot parent, World world, bool keepSubFiles)
         {
             var filename = Path.GetFileNameWithoutExtension(path);
             ResoniteSubtitleImporter.Msg("Importing subtitles");
-            await default(ToWorld);
-            var subRootSlot = parent.AddSlot("Subtitles - " + filename);
-            subRootSlot.Tag = "SubtitleImport";
 
             await default(ToBackground);
             var info = await FFmpeg.GetMediaInfo(path);
+            if (!info.SubtitleStreams.Any())
+                return null;
+            await default(ToWorld);
+            CleanupSubtitles(parent);
+            Slot subRootSlot = parent.AddSlot(SubtitleRootSlotNamePrefix + filename);
+            subRootSlot.Tag = SubtitleRootTag;
+            await default(ToBackground);
 
             ResoniteSubtitleImporter.Msg($"Importing {info.SubtitleStreams.Count()} subtitles");
             var i = 0;
@@ -117,6 +142,17 @@ namespace ResoniteSubtitleImporter
             }
 
             return subRootSlot;
+        }
+
+        public static FrooxEngine.User GetAllocatingUser(Slot slot)
+        {
+            slot.ReferenceID.ExtractIDs(out var position, out var userAllocId);
+            var user = slot.World.GetUserByAllocationID(userAllocId);
+            if (user == null)
+                return null;
+            if (position < user.AllocationIDStart)
+                return null;
+            return user;
         }
     }
 }

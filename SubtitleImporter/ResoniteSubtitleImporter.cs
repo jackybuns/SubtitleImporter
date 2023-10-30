@@ -94,7 +94,8 @@ namespace ResoniteSubtitleImporter
                         await default(ToWorld);
                         if (Config.GetValue(openInspector))
                         {
-                            DevCreateNewForm.OpenInspector(subRootSlot);
+                            if (subRootSlot != null)
+                                DevCreateNewForm.OpenInspector(subRootSlot);
                         }
                     }
                 });
