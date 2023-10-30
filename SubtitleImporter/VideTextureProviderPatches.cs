@@ -28,7 +28,9 @@ namespace ResoniteSubtitleImporter
                 return;
 
             await default(ToWorld);
-            var root = provider.Slot.GetObjectRoot();
+            var root = provider.Slot.GetObjectRoot(true);
+            if (root == null || root == provider.World.RootSlot || root == provider.LocalUserSpace)
+                return;
             await default(ToBackground);
             GatherResult gatherResult = await provider.Asset.AssetManager.GatherAsset(uri, 0f, DB_Endpoint.Video).ConfigureAwait(continueOnCapturedContext: false);
             string file = await gatherResult.GetFile().ConfigureAwait(continueOnCapturedContext: false);
