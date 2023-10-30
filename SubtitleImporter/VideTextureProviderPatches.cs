@@ -38,17 +38,15 @@ namespace ResoniteSubtitleImporter
                     __instance.StartGlobalTask(async delegate
                     {
                         ResoniteSubtitleImporter.Msg("Importing subtitles from VideoTextureProvider");
+                        await default(ToWorld);
+                        var root = __instance.Slot.GetObjectRoot();
                         await default(ToBackground);
                         GatherResult gatherResult = await __instance.Asset.AssetManager.GatherAsset(uri, 0f, DB_Endpoint.Video).ConfigureAwait(continueOnCapturedContext: false);
                         string file = await gatherResult.GetFile().ConfigureAwait(continueOnCapturedContext: false);
                         ResoniteSubtitleImporter.Msg(file);
                         if (File.Exists(file))
                         {
-                            var subsRootSlot = await ImportHelper.ImportSubtitles(file, __instance.World, false, false);
-                            await default(ToWorld);
-                            var root = __instance.Slot.GetObjectRoot();
-                            subsRootSlot.SetParent(root ?? __instance.Slot, false);
-                            subsRootSlot.SetIdentityTransform();
+                            var subsRootSlot = await ImportHelper.ImportSubtitles(file, root, __instance.World, false);
                         }
 
                         await default(ToWorld);

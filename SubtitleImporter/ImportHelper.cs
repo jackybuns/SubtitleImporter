@@ -13,25 +13,13 @@ namespace ResoniteSubtitleImporter
 {
     internal class ImportHelper
     {
-        public static async Task<Slot> ImportSubtitles(string path, World world, bool reparentToPlayer, bool keepSubFiles)
+        public static async Task<Slot> ImportSubtitles(string path, Slot parent, World world, bool keepSubFiles)
         {
             var filename = Path.GetFileNameWithoutExtension(path);
             ResoniteSubtitleImporter.Msg("Importing subtitles");
             await default(ToWorld);
-            var subRootSlot = world.LocalUserSpace.AddSlot("Subtitles - " + filename);
-
-            if (reparentToPlayer)
-            {
-                subRootSlot.Name = "Subtitles"; // rename cause we already know the filename from the video player
-                                                // try to find video player
-                Slot player = world.LocalUserSpace.FindChild(Path.GetFileName(path));
-                if (player != null)
-                {
-                    ResoniteSubtitleImporter.Msg("Video player found, parenting subtitles");
-                    subRootSlot.SetParent(player);
-                    subRootSlot.SetIdentityTransform();
-                }
-            }
+            var subRootSlot = parent.AddSlot("Subtitles - " + filename);
+            subRootSlot.Tag = "SubtitleImport";
 
             await default(ToBackground);
             var info = await FFmpeg.GetMediaInfo(path);

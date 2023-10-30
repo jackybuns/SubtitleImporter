@@ -83,7 +83,13 @@ namespace ResoniteSubtitleImporter
                         // we need this so we can ensure that the video player was created already, otherwise we cannot parent the subtitles there
                         await importTask;
 
-                        var subRootSlot = await ImportHelper.ImportSubtitles(path, world, Config.GetValue(reparentToPlayer), Config.GetValue(keepSubFiles));
+                        Slot parentSlot;
+                        if (Config.GetValue(reparentToPlayer))
+                            parentSlot = world.LocalUserSpace.FindChild(Path.GetFileName(path));
+                        else
+                            parentSlot = world.LocalUserSpace;
+
+                        var subRootSlot = await ImportHelper.ImportSubtitles(path, parentSlot, world, Config.GetValue(keepSubFiles));
 
                         await default(ToWorld);
                         if (Config.GetValue(openInspector))
