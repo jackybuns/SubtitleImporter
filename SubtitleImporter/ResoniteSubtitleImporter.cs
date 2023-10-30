@@ -169,8 +169,8 @@ namespace ResoniteSubtitleImporter
                             dynUri.VariableName.Value = "Subtitle/Uri";
 
                             var copy = subSlot.AttachComponent<ValueCopy<Uri>>();
-                            copy.Source.Value = animProvider.URL.ReferenceID;
-                            copy.Target.Value = dynUri.Value.ReferenceID;
+                            copy.Source.Target = animProvider.URL;
+                            copy.Target.Target = dynUri.Value;
 
                             var text = subSlot.AttachComponent<DynamicValueVariable<string>>();
                             text.VariableName.Value = "Subtitle/Text";
@@ -179,6 +179,10 @@ namespace ResoniteSubtitleImporter
                             assetProxy.AssetReference.Target = animProvider;
                             referenceProxy.Reference.Target = animProvider;
                             animator.Fields.Add().Target = text.Value;
+
+                            var dynAnim = subSlot.AttachComponent<DynamicReferenceVariable<IAssetProvider<FrooxEngine.Animation>>>();
+                            dynAnim.VariableName.Value = "Subtitle/Animation";
+                            dynAnim.Reference.TrySet(animProvider);
 
 
                             await default(ToBackground);
