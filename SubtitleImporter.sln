@@ -5,6 +5,8 @@ VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResoniteSubtitleImporter", "SubtitleImporter\ResoniteSubtitleImporter.csproj", "{142AEE4E-9311-4CBD-AE33-7E228D2E763B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResoniteSubtitleImporterTests", "ResoniteSubtitleImporterTests\ResoniteSubtitleImporterTests.csproj", "{079D2055-73F7-4EB2-933F-A391CD5B574E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{142AEE4E-9311-4CBD-AE33-7E228D2E763B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{142AEE4E-9311-4CBD-AE33-7E228D2E763B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{142AEE4E-9311-4CBD-AE33-7E228D2E763B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{079D2055-73F7-4EB2-933F-A391CD5B574E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{079D2055-73F7-4EB2-933F-A391CD5B574E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{079D2055-73F7-4EB2-933F-A391CD5B574E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{079D2055-73F7-4EB2-933F-A391CD5B574E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

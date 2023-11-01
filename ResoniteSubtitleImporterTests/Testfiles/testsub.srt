@@ -1,0 +1,21 @@
+1
+00:00:01,000 --> 00:00:04,330
+<font size="36"><b>"This is a test"</b></font>
+
+2
+00:00:23,550 --> 00:00:26,290
+<font size="36"><b><i>This is another test</i></b></font><font size="36"><b>
+</b></font><font size="36"><b><i>Multiple lines yeah</i></b></font>
+
+3
+00:00:26,290 --> 00:00:28,560
+<font size="36"><b><i>aaaaaaaaaaaaaaaaaaaaaa</i></b></font><font size="36"><b>
+</b></font><font size="36"><b><i>bbbbbbbbbbbbbbbbbbbbbb</i></b></font>
+
+4
+00:00:28,560 --> 00:00:30,130
+No tags wahooo
+
+5
+00:00:30,130 --> 00:00:32,390
+<font color="red">Anyone wanted color?</font>

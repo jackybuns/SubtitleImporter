@@ -1,0 +1,21 @@
+1
+00:00:01,000 --> 00:00:04,330
+<b>"This is a test"</b>
+
+2
+00:00:23,550 --> 00:00:26,290
+<b><i>This is another test</i></b><b>
+</b><b><i>Multiple lines yeah</i></b>
+
+3
+00:00:26,290 --> 00:00:28,560
+<b><i>aaaaaaaaaaaaaaaaaaaaaa</i></b><b>
+</b><b><i>bbbbbbbbbbbbbbbbbbbbbb</i></b>
+
+4
+00:00:28,560 --> 00:00:30,130
+No tags wahooo
+
+5
+00:00:30,130 --> 00:00:32,390
+Anyone wanted color?
