@@ -23,11 +23,17 @@ The mod is enabled by default and any video that you import or spawn that is not
 
 You can also check if you get the `Import Subtitles` button on the `VideoTextureProvider` ond the video assets slot of the video player and click that for a manual import. If that button is missing the mod was not loaded.
 
+### Video Player
+
+I also adapted my video player to support the imported subtitles. It can be found in this public folder `resrec:///U-Jackson/R-bb8dee84-51c3-4184-b8ef-38266b1874d9` (Copy and paste the link into Resonite). Subtitles can be enabled in the Video settings tab. Enabling them and changing language is local. Additional subtitles can be added by dragging the slot and dropping it into the drop zone. Changing the URL also imports the subs automatically after they are loaded. Make sure streaming is **disabled**.
+
+![screenshot of video player](screenshot.jpg)
+
 ## Known Problems
 
 ### `<font>` tags in SRT files
 
-We noticed that Resonite cannot handle most of the `<font>` tags in SRT files so we completely remove those after conversion they would show up in the sub text. If you still see some weird tags in the output, or generally some weird conversion artifacts, please make a bugreport on the discord and attach some screenshot of the broken parts.
+We noticed that Resonite cannot handle most of the `<font>` tags in SRT files so we completely remove those after conversion they would show up in the sub text. If you still see some weird tags in the output, or generally some weird conversion artifacts, please make a bugreport on the discord (or better create an GitHub issue) and attach some screenshot of the broken parts.
 
 ### Help my subtitles were not imported!
 
