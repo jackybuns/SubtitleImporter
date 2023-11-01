@@ -81,6 +81,11 @@ namespace ResoniteSubtitleImporter
 
         public static async Task<Slot> ImportSubtitles(string path, Slot parent, World world, bool keepSubFiles)
         {
+            if (!world.CanSpawnObjects())
+            {
+                ResoniteSubtitleImporter.Msg("No spawn perms, cannot import subtitles");
+                return null;
+            }
             var filename = Path.GetFileNameWithoutExtension(path);
             ResoniteSubtitleImporter.Msg("Importing subtitles");
 
