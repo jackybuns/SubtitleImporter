@@ -35,6 +35,12 @@ namespace ResoniteSubtitleImporter
 
         public override void OnEngineInit()
         {
+            var path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "..");
+            if (File.Exists(Path.Combine(path, "ffmpeg.exe")))
+            {
+                FFmpeg.SetExecutablesPath(path);
+            }
+
             Config = GetConfiguration(); //Get this mods' current ModConfiguration
             Config.Save(true); //If you'd like to save the default config values to file
             //Harmony.DEBUG = true;
