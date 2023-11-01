@@ -90,8 +90,7 @@ namespace ResoniteSubtitleImporter
                 return null;
             await default(ToWorld);
             CleanupSubtitles(parent);
-            Slot subRootSlot = parent.AddSlot(SubtitleRootSlotNamePrefix + filename);
-            subRootSlot.Tag = SubtitleRootTag;
+            Slot subRootSlot = world.LocalUserSpace.AddSlot(SubtitleRootSlotNamePrefix + filename);
             await default(ToBackground);
 
             ResoniteSubtitleImporter.Msg($"Importing {info.SubtitleStreams.Count()} subtitles");
@@ -123,6 +122,14 @@ namespace ResoniteSubtitleImporter
                 {
                     ResoniteSubtitleImporter.Error("Subtitle extraction failed!");
                     ResoniteSubtitleImporter.Error(e);
+                    if (File.Exists(outputPathSrt))
+                    {
+                        try
+                        {
+                            File.Delete(outputPathSrt);
+                        }
+                        catch { }
+                    }
                     continue;
                 }
 
@@ -192,6 +199,12 @@ namespace ResoniteSubtitleImporter
                 }
                 i++;
             }
+
+            // reparent slot to parent slot
+            await default(ToWorld);
+            subRootSlot.Tag = SubtitleRootTag;
+            subRootSlot.SetParent(parent, false);
+            subRootSlot.SetIdentityTransform();
 
             return subRootSlot;
         }
