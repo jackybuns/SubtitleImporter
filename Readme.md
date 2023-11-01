@@ -13,7 +13,7 @@ The dynamic variable space on each subtitle is called `Subtitle` and contains a 
 
 ## Installation
 1. Install [ResoniteModLoader](https://github.com/resonite-modding-group/ResoniteModLoader).
-2. Place the `rml_mods` and `rml_libs` folders in your Resonite installation directory. Your installation should be at `C:\Program Files (x86)\Steam\steamapps\common\Resonite` for a default install. You can create it if it's missing, or if you launch the game once with ResoniteModLoader installed it will create the folder for you.
+2. Download the mod from the [Releases](https://github.com/jackybuns/ResoniteSubtitleImporter/releases/latest). Then place the `rml_mods` and `rml_libs` folders in your Resonite installation directory. Your installation should be at `C:\Program Files (x86)\Steam\steamapps\common\Resonite` for a default install. You can create it if it's missing, or if you launch the game once with ResoniteModLoader installed it will create the folder for you.
 3.  Install **ffmpeg** by opening a command prompt as admin and execute `winget install ffmpeg` if you have winget. To get and admin command prompt right click your windows icon in the task bar and start the admin cmd. Otherwise manually install ffmpeg from [here](https://www.gyan.dev/ffmpeg/builds/#release-builds) and add the bin folder to your `PATH` environment variable or copy the exe files in the bin directory directly to your Resonite installation (same folder as Resonite.exe).
 3. Start the game. If you want to verify that the mod is working you can check your Resonite logs.
 
