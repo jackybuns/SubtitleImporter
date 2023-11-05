@@ -18,7 +18,7 @@ namespace ResoniteSubtitleImporter
     {
         public override string Name => "ResoniteSubtitleImporter";
         public override string Author => "Jackybuns (U-Jackson)";
-        public override string Version => "0.0.1"; //Version of the mod, should match the AssemblyVersion
+        public override string Version => "0.0.2"; //Version of the mod, should match the AssemblyVersion
         public override string Link => "https://github.com/jackybuns/ResoniteSubtitleImporter"; // Optional link to a repo where this mod would be located
 
         [AutoRegisterConfigKey]

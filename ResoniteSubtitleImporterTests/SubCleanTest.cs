@@ -14,7 +14,7 @@ namespace ResoniteSubtitleImporterTests
             var input = "Testfiles/testsub.srt";
             var output = "out.srt";
             var compare = "Testfiles/out.srt";
-            ImportHelper.CleanSrt(input, output);
+            ImportHelper.CleanSRT(input, output);
 
             using (var reader = new StreamReader(File.OpenRead(output)))
             {
@@ -40,7 +40,7 @@ namespace ResoniteSubtitleImporterTests
 
             File.Copy(input, output, true);
 
-            ImportHelper.CleanSrt(output, output); // should not crash
+            ImportHelper.CleanSRT(output, output); // should not crash
 
             // cleanup
             if (File.Exists(output))
