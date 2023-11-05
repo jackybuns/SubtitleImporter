@@ -303,20 +303,23 @@ namespace ResoniteSubtitleImporter
             var track = anim.AddTrack<DiscreteStringAnimationTrack>();
             track.Node = "Subtitle";
             track.Property = "Text";
-            int currentTime = items[0].StartTime;
-            if (currentTime != 0)
+            int prevEndTime = items[0].StartTime;
+            if (prevEndTime != 0)
                 track.InsertKeyFrame(null, 0f);
 
             foreach (var item in items)
             {
-                if (item.StartTime > currentTime)
-                    track.InsertKeyFrame(null, currentTime * 0.001f);
+                // end previous item if there is a pause
+                if (item.StartTime > prevEndTime)
+                    track.InsertKeyFrame(null, prevEndTime * 0.001f);
 
                 var text = string.Join("\n", item.Lines);
                 text = newlineRegex.Replace(text, "\n"); // fix \N newlines
                 track.InsertKeyFrame(text, (float)item.StartTime * 0.001f);
-                currentTime = item.EndTime;
+                prevEndTime = item.EndTime;
             }
+            // finish last item
+            track.InsertKeyFrame(null, prevEndTime * 0.001f);
 
             return anim;
         }
