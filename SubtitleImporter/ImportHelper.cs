@@ -1,5 +1,4 @@
-﻿using Elements.Assets;
-using Elements.Core;
+﻿using Elements.Core;
 using FrooxEngine;
 using SubtitlesParser.Classes;
 using System;
@@ -12,7 +11,7 @@ using System.Threading.Tasks;
 using Xabe.FFmpeg;
 using Xabe.FFmpeg.Streams.SubtitleStream;
 
-namespace ResoniteSubtitleImporter
+namespace SubtitleImporter
 {
     public class ImportHelper
     {
@@ -122,11 +121,11 @@ namespace ResoniteSubtitleImporter
         {
             if (!world.CanSpawnObjects())
             {
-                ResoniteSubtitleImporter.Msg("No spawn perms, cannot import subtitles");
+                SubtitleImporter.Msg("No spawn perms, cannot import subtitles");
                 return null;
             }
             var filename = Path.GetFileNameWithoutExtension(path);
-            ResoniteSubtitleImporter.Msg("Importing subtitles");
+            SubtitleImporter.Msg("Importing subtitles");
 
             await default(ToBackground);
             var info = await FFmpeg.GetMediaInfo(path);
@@ -137,7 +136,7 @@ namespace ResoniteSubtitleImporter
             Slot subRootSlot = world.LocalUserSpace.AddSlot(SubtitleRootSlotNamePrefix + filename);
             await default(ToBackground);
 
-            ResoniteSubtitleImporter.Msg($"Importing {info.SubtitleStreams.Count()} subtitles");
+            SubtitleImporter.Msg($"Importing {info.SubtitleStreams.Count()} subtitles");
             var i = 0;
             foreach (var subtitle in info.SubtitleStreams)
             {
@@ -151,7 +150,7 @@ namespace ResoniteSubtitleImporter
                 var extension = "srt";
                 if (SupportedSubtitleCodecs.TryGetValue(subtitle.Codec, out var codec))
                 {
-                    ResoniteSubtitleImporter.Msg($"Found supported subtitle codec {subtitle.Codec}");
+                    SubtitleImporter.Msg($"Found supported subtitle codec {subtitle.Codec}");
                     extension = codec.Extension.Split('.')[1];
                 }
 
@@ -171,8 +170,8 @@ namespace ResoniteSubtitleImporter
                 }
                 catch (Exception e)
                 {
-                    ResoniteSubtitleImporter.Error("Subtitle extraction failed!");
-                    ResoniteSubtitleImporter.Error(e);
+                    SubtitleImporter.Error("Subtitle extraction failed!");
+                    SubtitleImporter.Error(e);
                     if (File.Exists(outputPathExtract))
                     {
                         try
@@ -190,15 +189,15 @@ namespace ResoniteSubtitleImporter
                 {
                     try
                     {
-                        ResoniteSubtitleImporter.Msg("Try to clean subtitles");
+                        SubtitleImporter.Msg("Try to clean subtitles");
                         CleanSRT(outputPathExtract, outputPathCleaned);
                         outputFile = outputPathCleaned;
-                        ResoniteSubtitleImporter.Msg("Subtitles cleaned successfully");
+                        SubtitleImporter.Msg("Subtitles cleaned successfully");
                     }
                     catch (Exception ex)
                     {
-                        ResoniteSubtitleImporter.Error("Cleaning subtitles failed");
-                        ResoniteSubtitleImporter.Error(ex);
+                        SubtitleImporter.Error("Cleaning subtitles failed");
+                        SubtitleImporter.Error(ex);
                         outputFile = outputPathExtract;
                     }
                 }
@@ -206,24 +205,24 @@ namespace ResoniteSubtitleImporter
                 {
                     try
                     {
-                        ResoniteSubtitleImporter.Msg("Try to clean subtitles");
+                        SubtitleImporter.Msg("Try to clean subtitles");
                         CleanSSA(outputPathExtract, outputPathCleaned);
                         outputFile = outputPathCleaned;
-                        ResoniteSubtitleImporter.Msg("Subtitles cleaned successfully");
+                        SubtitleImporter.Msg("Subtitles cleaned successfully");
                     }
                     catch (Exception ex)
                     {
-                        ResoniteSubtitleImporter.Error("Cleaning subtitles failed");
-                        ResoniteSubtitleImporter.Error(ex);
+                        SubtitleImporter.Error("Cleaning subtitles failed");
+                        SubtitleImporter.Error(ex);
                         outputFile = outputPathExtract;
                     }
                 }
 
-                ResoniteSubtitleImporter.Msg($"SRT Subtitle conversion took {(result.EndTime - result.StartTime).TotalSeconds} seconds");
+                SubtitleImporter.Msg($"SRT Subtitle conversion took {(result.EndTime - result.StartTime).TotalSeconds} seconds");
 
 
                 // import sub
-                ResoniteSubtitleImporter.Msg("importing subtitle " + subname);
+                SubtitleImporter.Msg("importing subtitle " + subname);
                 await default(ToBackground);
                 AnimX anim = ImportSubtitle(outputFile);
                 Uri subUri = await world.Engine.LocalDB.SaveAssetAsync(anim);
@@ -291,7 +290,7 @@ namespace ResoniteSubtitleImporter
             var newlineRegex = new Regex("\\\\N"); // ASS has \N as newlines for some reason
             var subParser = new SubtitlesParser.Classes.Parsers.SubParser();
             var format = subParser.GetMostLikelyFormat(path);
-            ResoniteSubtitleImporter.Debug($"Found likely sub format {format?.ToString()}");
+            SubtitleImporter.Debug($"Found likely sub format {format?.ToString()}");
 
             List<SubtitleItem> items;
             using (var stream = File.OpenRead(path))

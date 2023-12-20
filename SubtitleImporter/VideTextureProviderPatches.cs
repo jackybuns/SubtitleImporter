@@ -11,7 +11,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ResoniteSubtitleImporter
+namespace SubtitleImporter
 {
     [HarmonyPatch(typeof(VideoTextureProvider))]
     internal class VideTextureProviderPatches
@@ -32,7 +32,7 @@ namespace ResoniteSubtitleImporter
             // ensure that we import to the video player on an automatic import
             if (enforceObjectRoot && (root == null || root == provider.World.RootSlot || root == provider.LocalUserSpace))
             {
-                ResoniteSubtitleImporter.Msg("Could not find root of video player to import subtitles to. Make sure the player has an ObjectRoot component.");
+                SubtitleImporter.Msg("Could not find root of video player to import subtitles to. Make sure the player has an ObjectRoot component.");
                 return null;
             }
 
@@ -53,7 +53,7 @@ namespace ResoniteSubtitleImporter
         [HarmonyPatch("VideoLoaded")]
         public static void VideoLoadedPostFix(VideoTextureProvider __instance, bool assetInstanceChanged)
         {
-            if (!ResoniteSubtitleImporter.Config.GetValue(ResoniteSubtitleImporter.enabled))
+            if (!SubtitleImporter.Config.GetValue(SubtitleImporter.enabled))
                 return;
 
             var allocator = ImportHelper.GetAllocatingUser(__instance.Slot);
@@ -67,7 +67,7 @@ namespace ResoniteSubtitleImporter
             if ((__instance.URL != null && __instance.URL.LastModifyingUser == __instance.LocalUser) ||
                 (allocator != null && allocator == __instance.LocalUser))
             {
-                ResoniteSubtitleImporter.Msg("Automatically importing subtitles");
+                SubtitleImporter.Msg("Automatically importing subtitles");
                 __instance.StartGlobalTask(async delegate
                 {
                     try
@@ -76,8 +76,8 @@ namespace ResoniteSubtitleImporter
                     }
                     catch (Exception ex)
                     {
-                        ResoniteSubtitleImporter.Error("Error on auto subtitle import");
-                        ResoniteSubtitleImporter.Error(ex);
+                        SubtitleImporter.Error("Error on auto subtitle import");
+                        SubtitleImporter.Error(ex);
                     }
                 });
             }
@@ -90,11 +90,11 @@ namespace ResoniteSubtitleImporter
             var button = ui.Button("Import Subtitles");
             button.LocalPressed += async (sender, args) =>
             {
-                ResoniteSubtitleImporter.Msg("Manually importing subtitles from VideoTextureProvider");
+                SubtitleImporter.Msg("Manually importing subtitles from VideoTextureProvider");
 
                 if (__instance.Stream.Value == true)
                 {
-                    ResoniteSubtitleImporter.Msg("Video player is set to stream, cannot import subtitles");
+                    SubtitleImporter.Msg("Video player is set to stream, cannot import subtitles");
                     return;
                 }
 
@@ -106,7 +106,7 @@ namespace ResoniteSubtitleImporter
                 button.LabelText = "Importing...";
                 if (__instance.Asset.LoadState == AssetLoadState.FullyLoaded)
                 {
-                    ResoniteSubtitleImporter.Msg("Importing subtitles from VideoTextureProvider");
+                    SubtitleImporter.Msg("Importing subtitles from VideoTextureProvider");
                     __instance.StartGlobalTask(async delegate
                     {
                         try
@@ -120,7 +120,7 @@ namespace ResoniteSubtitleImporter
                             button.LabelText = "Import Subtitles";
                             button.Enabled = true;
 
-                            if (subRootSlot != null && ResoniteSubtitleImporter.Config.GetValue(ResoniteSubtitleImporter.openInspector))
+                            if (subRootSlot != null && SubtitleImporter.Config.GetValue(SubtitleImporter.openInspector))
                             {
                                 await default(ToWorld);
                                 DevCreateNewForm.OpenInspector(subRootSlot);
@@ -128,7 +128,7 @@ namespace ResoniteSubtitleImporter
                         }
                         catch (Exception ex)
                         {
-                            ResoniteSubtitleImporter.Error(ex);
+                            SubtitleImporter.Error(ex);
                             await default(ToWorld);
                             button.LabelText = "Error!";
                             await default(ToBackground);

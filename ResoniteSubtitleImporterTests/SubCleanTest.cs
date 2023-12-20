@@ -1,9 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ResoniteSubtitleImporter;
+using SubtitleImporter;
 using System;
 using System.IO;
 
-namespace ResoniteSubtitleImporterTests
+namespace SubtitleImporterTests
 {
     [TestClass]
     public class SubCleanTest

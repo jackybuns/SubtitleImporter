@@ -1,25 +1,18 @@
-﻿using Elements.Assets;
-using Elements.Core;
-using FrooxEngine;
-using HarmonyLib; // HarmonyLib comes included with a ResoniteModLoader install
+﻿using HarmonyLib; // HarmonyLib comes included with a ResoniteModLoader install
 using ResoniteModLoader;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using Xabe.FFmpeg;
 
-namespace ResoniteSubtitleImporter
+namespace SubtitleImporter
 {
 
-    public class ResoniteSubtitleImporter : ResoniteMod
+    public class SubtitleImporter : ResoniteMod
     {
-        public override string Name => "ResoniteSubtitleImporter";
+        public override string Name => "SubtitleImporter";
         public override string Author => "Jackybuns (U-Jackson)";
         public override string Version => "0.0.2"; //Version of the mod, should match the AssemblyVersion
-        public override string Link => "https://github.com/jackybuns/ResoniteSubtitleImporter"; // Optional link to a repo where this mod would be located
+        public override string Link => "https://github.com/jackybuns/SubtitleImporter"; // Optional link to a repo where this mod would be located
 
         [AutoRegisterConfigKey]
         internal static readonly ModConfigurationKey<bool> enabled = new ModConfigurationKey<bool>("import subtitles", "If subtitles should be automatically imported on any video player that you spawn or set the URL of.", () => true); //Optional config settings
